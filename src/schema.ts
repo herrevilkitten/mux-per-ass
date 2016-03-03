@@ -6,7 +6,8 @@ var playerSchema = new Schema({
     names: [String],
     lastName: String,
     lastSeen: Date,
-    lastAction: String
+    lastAction: String,
+    connected: Boolean
 });
 
 export var schema: {} = {

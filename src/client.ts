@@ -32,7 +32,7 @@ client.on(EventType.CONNECT, nospoof);
 client.process(nospoof);
 client.process(new MessageType());
 
-//client.on(EventType.DATA, new Retext());
+client.on(EventType.DATA, new Retext());
 client.on(EventType.DATA, new UrlListener())
 client.on(EventType.DATA, new PlayerMonitor())
 client.on(EventType.DATA, new UrlSearcher());

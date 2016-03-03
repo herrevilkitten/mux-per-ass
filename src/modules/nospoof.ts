@@ -18,7 +18,7 @@ export class NoSpoof implements Handler, InputPipe {
             player,
             playerName,
             playerId;
-        console.log('Spoof input', data);
+
         for (var i = 0; i < NoSpoof.SPOOF_PATTERNS.length; ++i) {
             match = NoSpoof.SPOOF_PATTERNS[i].exec(data);
             if (match) {

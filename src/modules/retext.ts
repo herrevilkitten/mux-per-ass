@@ -20,6 +20,9 @@ export class Retext implements Handler {
     processor: any;
 
     handle(event: DataEvent): void {
-        this.processor.process(event.data.input);
+        if (!event.data.data.message || event.data.data.type === 'POSE') {
+            return;
+        }
+        this.processor.process(event.data.data.message);
     }
 }

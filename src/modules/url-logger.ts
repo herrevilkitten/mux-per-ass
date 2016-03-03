@@ -46,17 +46,20 @@ export class UrlListener implements Handler {
 
 export class UrlSearcher implements Handler {
     handle(event: DataEvent): void {
-        var data = event.data.input,
+        var data = event.data.data.message,
             player = event.data.data.player,
             isPrivate = event.data.data.private,
             match;
 
-        console.log(inspect(data));
+        if (event.data.data.type !== 'DIRSAY' && event.data.data.type !== 'PAGE') {
+            return;
+        }
+
         var pattern = /search urls for (.+)/i;
         match = pattern.exec(data);
         if (match) {
-            console.log(inspect(event.data));
             var query = match[1];
+            console.log('urls', database.urls);
             database.urls.forEach(function(item: Url) {
                 if (item.url.indexOf(query) > -1) {
                     if (isPrivate) {

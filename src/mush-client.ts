@@ -100,7 +100,10 @@ export class Client {
             return;
         }
 
-        console.log("Sending", data);
+        if (data.trim() != '') {
+            console.log("Sending", data.trim());
+        }
+        
         this.socket.write(data);
     }
 
