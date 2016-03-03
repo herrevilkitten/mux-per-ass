@@ -1,0 +1,28 @@
+{
+  "name": "mux-per-ass",
+  "version": "1.0.0",
+  "description": "MUX Personal Assistant",
+  "main": "app/client.js",
+  "scripts": {
+    "start": "node app/client.js",
+    "start-w": "watch \"node app/client.js\" app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.5.2",
+    "asynch": "^0.5.2",
+    "inspect": "0.0.2",
+    "mongoose": "^4.4.5",
+    "nlcst-to-string": "^1.1.0",
+    "retext": "^1.0.0",
+    "retext-keywords": "^1.0.1",
+    "retext-porter-stemmer": "^1.0.0",
+    "retext-pos": "^1.0.0",
+    "retext-sentiment": "^1.0.0",
+    "unist-util-inspect": "^3.0.0",
+    "unist-util-modify-children": "^1.0.0",
+    "unist-util-visit": "^1.0.0"
+  }
+}
