@@ -8,7 +8,7 @@ export class Configuration {
         port: number,
         ssl: boolean
     };
-    
+
     player: {
         username: string,
         password: string
@@ -16,7 +16,14 @@ export class Configuration {
 
     database: {
         host: string,
-        port: number
+        port: number,
+        schema: string,
+        username: string,
+        password: string
+    }
+
+    get databaseUrl(): string {
+        return "mongodb://" + this.database.username + ":" + this.database.password + "@" + this.database.host + ":" + this.database.port + "/" + this.database.schema;
     }
 }
 

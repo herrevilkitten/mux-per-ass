@@ -10,6 +10,12 @@ var playerSchema = new Schema({
     connected: Boolean
 });
 
-export var schema: {} = {
-    player: playerSchema
+var urlSchema = new Schema({
+    url: String,
+    player: Number
+});
+
+export var schema = {
+    player: playerSchema,
+    url: urlSchema
 };

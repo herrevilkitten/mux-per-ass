@@ -1,0 +1,20 @@
+{
+    "mux": {
+        "host": "neil.ogr.no",
+        "port": 6251,
+        "ssl": true
+    },
+    
+    "player": {
+        "username": "mpass",
+        "password": "cmr462"
+    },
+    
+    "database": {
+        "host": "ds045795.mlab.com",
+        "port": 45795,
+        "schema": "mpass",
+        "username": "mpass",
+        "password": "mpass"
+    }
+}

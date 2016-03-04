@@ -13,7 +13,6 @@ import * as fs from "fs";
 
 import {EventType, Client} from "./mush-client";
 import {UrlListener, UrlSearcher} from "./modules/url-logger";
-import {PlayerMonitor} from "./modules/player-loader";
 import {configuration} from "./config";
 import {NoSpoof} from "./modules/nospoof";
 import {MessageType} from "./modules/message-type";
@@ -34,7 +33,6 @@ client.process(new MessageType());
 
 client.on(EventType.DATA, new Retext());
 client.on(EventType.DATA, new UrlListener())
-client.on(EventType.DATA, new PlayerMonitor())
 client.on(EventType.DATA, new UrlSearcher());
 
 client.connect();
