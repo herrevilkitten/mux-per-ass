@@ -1,19 +1,13 @@
 import {Event, DataEvent, Handler} from "../mush-client";
 import {SearchEvent} from "./searcher";
+import {Url, database} from "../database";
 
 const inspect = require('unist-util-inspect');
-const database = require('../database');
-
-class Url {
-    source: string;
-    url: string;
-}
 
 export class UrlListener implements Handler {
     static URL_PATTERN: RegExp = /(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*(\/?)/gi;
 
     constructor() {
-        database.urls = [];
     }
 
     handle(event: DataEvent): void {
@@ -38,10 +32,7 @@ export class UrlListener implements Handler {
                 data = event.data;
 
             console.log('Found URL', url);
-            database.urls.push({
-                source: player.id,
-                url: url
-            });
+            database.urls.add(new Url(url, player.id));
         }
     }
 }
@@ -62,8 +53,7 @@ export class UrlSearcher implements Handler {
             return;
         }
 
-        console.log('urls', database.urls);
-        database.urls.forEach(function(item: Url) {
+        database.urls.findAll().forEach(function(item: Url) {
             if (item.url.indexOf(search) > -1) {
                 if (isPrivate) {
                     event.client.sendln("page #" + player.id + "=" + item.url);

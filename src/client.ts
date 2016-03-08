@@ -14,7 +14,7 @@ import * as fs from "fs";
 import {EventType, Client} from "./mush-client";
 import {UrlListener, UrlSearcher} from "./modules/url-logger";
 import {configuration} from "./config";
-import {NoSpoof} from "./modules/nospoof";
+import {NoSpoof, PlayerSearcher} from "./modules/nospoof";
 import {MessageType} from "./modules/message-type";
 import {Retext} from "./modules/retext";
 import {KeepAlive} from "./modules/keep-alive";
@@ -39,6 +39,7 @@ client.on(EventType.TIMER, keepalive);
 //client.on(EventType.DATA, new Retext());
 client.on(EventType.DATA, new UrlListener())
 client.on(SEARCH, new UrlSearcher());
+client.on(SEARCH, new PlayerSearcher());
 client.on(EventType.DATA, new Searcher());
 
 client.connect();

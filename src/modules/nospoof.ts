@@ -1,5 +1,6 @@
 import {Handler, ConnectEvent, Input, InputPipe} from "../mush-client";
-import {database} from "../database";
+import {database, Player} from "../database";
+import {SearchEvent} from "./searcher";
 
 export class NoSpoof implements Handler, InputPipe {
     static SPOOF_PATTERNS = [
@@ -15,7 +16,7 @@ export class NoSpoof implements Handler, InputPipe {
     pipe(input: Input): boolean {
         var data = input.input,
             match,
-            player,
+            player: Player,
             playerName,
             playerId;
 
@@ -35,7 +36,7 @@ export class NoSpoof implements Handler, InputPipe {
             }
 
             if (playerId) {
-                player = database.players[playerId];
+                player = database.players.find({ id: playerId });
             } else {
                 return true;
             }
@@ -47,11 +48,11 @@ export class NoSpoof implements Handler, InputPipe {
                     input.client.sendln("think \\[[name(#" + playerId + ")(#" + playerId + ")]\\] " + input.input);
                     throw "Need mah spoofing";
                 }
-                player = {
-                    id: playerId,
-                    names: [playerName]
-                };
-                database.players[playerId] = player;
+                player = new Player();
+                player.id = playerId;
+                player.names = [playerName];
+
+                database.players.add(player);
             }
 
             if (playerName) {
@@ -63,5 +64,39 @@ export class NoSpoof implements Handler, InputPipe {
         }
 
         return true;
+    }
+}
+
+export class PlayerSearcher implements Handler {
+    handle(event: SearchEvent) {
+        var search = event.search,
+            player = event.data.data.player,
+            isPrivate = event.data.data.private;
+
+        if (event.source !== 'players') {
+            return;
+        }
+
+        if (event.data.data.type !== 'DIRSAY' && event.data.data.type !== 'PAGE') {
+            return;
+        }
+
+        database.players.findAll().forEach(function(item: Player) {
+            var match = false;
+            if (item.id == Number(search)) {
+                match = true;
+            } else {
+                match = item.names.some((name) => { return name.toLowerCase().indexOf(search) > -1; });
+            }
+
+            if (match) {
+                if (isPrivate) {
+                    event.client.sendln("page #" + player.id + "= #" + item.id + " " + item.lastName);
+                } else {
+                    event.client.sendln("'#" + player.id + " #" + item.id + " " + item.lastName);
+                }
+            }
+        });
+
     }
 }
