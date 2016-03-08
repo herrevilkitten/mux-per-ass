@@ -3,8 +3,6 @@ import * as tls from "tls";
 import * as http from "http";
 import * as https from "https";
 
-const async = require("async");
-
 export interface Handler {
     handle(event: Event): void;
 };
@@ -12,11 +10,13 @@ export interface Handler {
 export enum EventType {
     CONNECT,
     DISCONNECT,
-    DATA
+    DATA,
+    TIMER,
+    CUSTOM
 };
 
 export class Input {
-    constructor(client: Client, input:string) {
+    constructor(client: Client, input: string) {
         this.client = client;
         this.original = input;
         this.input = input;
@@ -67,6 +67,13 @@ export class DataEvent extends Event {
     data: Input;
 }
 
+export class TimerEvent extends Event {
+    constructor(client: Client) {
+        super(client);
+        this.type = EventType.TIMER;
+    }
+}
+
 export interface ClientOptions {
     host: string,
     port: number,
@@ -79,7 +86,10 @@ export class Client {
         this.handlers = {
             connect: [],
             disconnect: [],
-            data: []        }
+            data: [],
+            timer: [],
+            custom: {}
+        }
 
         this.pipes = [];
     }
@@ -87,10 +97,13 @@ export class Client {
     socket: tls.ClearTextStream;
     connected: boolean;
     initialized: boolean;
+    interval: NodeJS.Timer;
     handlers: {
         connect: Handler[],
         disconnect: Handler[],
-        data: Handler[]
+        data: Handler[],
+        timer: Handler[]
+        custom: {}
     };
 
     pipes: InputPipe[];
@@ -103,7 +116,7 @@ export class Client {
         if (data.trim() != '') {
             console.log("Sending", data.trim());
         }
-        
+
         this.socket.write(data);
     }
 
@@ -131,6 +144,15 @@ export class Client {
                 break;
             case EventType.DATA:
                 handlers = this.handlers.data;
+                break;
+            case EventType.TIMER:
+                handlers = this.handlers.timer;
+                break;
+            default:
+                if (!this.handlers.custom[eventType]) {
+                    this.handlers.custom[eventType] = [];
+                }
+                handlers = this.handlers.custom[eventType];
                 break;
         }
 
@@ -162,8 +184,16 @@ export class Client {
             rejectUnauthorized: false
         }, () => {
             console.log('Connected to ' + this.options.host + ':' + this.options.port);
-
         });
+
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+
+        this.interval = setInterval(() => {
+            this.emit(new TimerEvent(this));
+        }, 1000);
 
         this.socket.on('data', (data) => {
             var inputString = data.toString().trim();
@@ -195,6 +225,10 @@ export class Client {
         });
 
         this.socket.on('end', () => {
+            if (this.interval) {
+                clearInterval(this.interval);
+                this.interval = null;
+            }
             this.emit(new DisconnectEvent(this));
             console.log('Disconnected from server');
         });

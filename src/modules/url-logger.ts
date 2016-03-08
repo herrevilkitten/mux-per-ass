@@ -1,4 +1,6 @@
 import {Event, DataEvent, Handler} from "../mush-client";
+import {SearchEvent} from "./searcher";
+
 const inspect = require('unist-util-inspect');
 const database = require('../database');
 
@@ -45,30 +47,30 @@ export class UrlListener implements Handler {
 }
 
 export class UrlSearcher implements Handler {
-    handle(event: DataEvent): void {
-        var data = event.data.data.message,
+    handle(event: SearchEvent): void {
+        var source = event.source,
+            search = event.search,
             player = event.data.data.player,
             isPrivate = event.data.data.private,
             match;
+
+        if (source !== 'urls') {
+            return;
+        }
 
         if (event.data.data.type !== 'DIRSAY' && event.data.data.type !== 'PAGE') {
             return;
         }
 
-        var pattern = /search urls for (.+)/i;
-        match = pattern.exec(data);
-        if (match) {
-            var query = match[1];
-            console.log('urls', database.urls);
-            database.urls.forEach(function(item: Url) {
-                if (item.url.indexOf(query) > -1) {
-                    if (isPrivate) {
-                        event.client.sendln("page #" + player.id + "=" + item.url);
-                    } else {
-                        event.client.sendln("'#" + player.id + " " + item.url);
-                    }
+        console.log('urls', database.urls);
+        database.urls.forEach(function(item: Url) {
+            if (item.url.indexOf(search) > -1) {
+                if (isPrivate) {
+                    event.client.sendln("page #" + player.id + "=" + item.url);
+                } else {
+                    event.client.sendln("'#" + player.id + " " + item.url);
                 }
-            });
-        }
+            }
+        });
     }
 }

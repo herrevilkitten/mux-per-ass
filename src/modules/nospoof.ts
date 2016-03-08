@@ -43,6 +43,7 @@ export class NoSpoof implements Handler, InputPipe {
             input.input = input.input.substr(match[0].length).trim();
             if (!player) {
                 if (!playerName) {
+                    var spoofInput = input.input;
                     input.client.sendln("think \\[[name(#" + playerId + ")(#" + playerId + ")]\\] " + input.input);
                     throw "Need mah spoofing";
                 }
