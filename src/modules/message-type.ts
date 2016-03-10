@@ -1,4 +1,4 @@
-import {Handler, ConnectEvent, Input, InputPipe} from "../mush-client";
+import {Handler, ConnectEvent, Input, Pipe, PipeAction} from "../mush-client";
 
 export interface SayPattern {
     pattern: RegExp;
@@ -6,7 +6,7 @@ export interface SayPattern {
     type: string;
 }
 
-export class MessageType implements InputPipe {
+export class MessageType implements Pipe {
     static PATTERNS: SayPattern[] = [
         {
             pattern: /^.+ pages: (.+)/,
@@ -25,7 +25,7 @@ export class MessageType implements InputPipe {
         }
     ]
 
-    pipe(input: Input): boolean {
+    pipe(input: Input): void {
         for (var i = 0; i < MessageType.PATTERNS.length; ++i) {
             var match = MessageType.PATTERNS[i].pattern.exec(input.input);
             if (match) {
@@ -41,6 +41,29 @@ export class MessageType implements InputPipe {
             input.data.private = false;
             input.data.type = 'POSE';
         }
-        return true;
+
+        input.data.respond = function(message: string): void {
+            var preamble: string;
+            if (!input.data.player) {
+                preamble = 'say ';
+            } else {
+                switch (input.data.type) {
+                    case 'PAGE':
+                    case 'WHISPER':
+                        preamble = 'page #' + input.data.player.id + '=';
+                        break;
+                    case 'DIRSAY':
+                        preamble = '\'#' + input.data.player.id + ' ';
+                        break;
+                    case 'SAY':
+                    case 'POSE':
+                        preamble = 'say ';
+                        break;
+                }
+            }
+            if (preamble) {
+                input.client.sendln(preamble + message);
+            }
+        };
     }
 }

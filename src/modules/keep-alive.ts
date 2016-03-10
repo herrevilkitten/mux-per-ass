@@ -1,18 +1,17 @@
-import {Handler, TimerEvent, InputPipe, Input} from "../mush-client";
+import {Handler, TimerEvent, Pipe, PipeAction, Input} from "../mush-client";
 
-export class KeepAlive implements Handler, InputPipe {
+export class KeepAlive implements Handler, Pipe {
     count: number = 0;
-    
-    pipe(input: Input): boolean {
-        if ( input.input == 'NoIdle') {
-            throw "Gag this";
+
+    pipe(input: Input): PipeAction {
+        if (input.input == 'NoIdle') {
+            return PipeAction.ABORT;
         }
-        return true;
     }
-    
+
     handle(event: TimerEvent) {
         this.count = (this.count + 1) % 120;
-        if ( this.count == 0) {
+        if (this.count == 0) {
             event.client.sendln("@pemit me=NoIdle");
         }
     }

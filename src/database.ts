@@ -4,28 +4,6 @@ export interface Item {
     id: number;
 }
 
-export class Player implements Item {
-    id: number;
-    names: string[];
-    lastName: string;
-    lastSeen: Date;
-    lastAction: string;
-    connected: boolean;
-}
-
-export class Url implements Item {
-    constructor(url: string, player: number) {
-        this.url = url;
-        this.player = player;
-        this.timestamp = new Date();
-    }
-
-    id: number;
-    url: string;
-    player: number;
-    timestamp: Date;
-}
-
 export class Database<T extends Item> {
     constructor() {
         this.items = {};
@@ -81,7 +59,70 @@ export class Database<T extends Item> {
     }
 }
 
-export var database = {
-    players: new Database<Player>(),
-    urls: new Database<Url>()
-};
+export interface PersistedStorage {
+    saveItem(item: Item): void;
+    loadItem(id: number): Object;
+    saveAll(items: Item[] | { [id: number]: Item }): void;
+    loadAll(): Item[];
+}
+
+export class PersistedDatabase<T extends Item> extends Database<T> {
+    constructor(storage: PersistedStorage) {
+        super();
+        this.storage = storage;
+        var items = <T[]>storage.loadAll(),
+            maxId = 0;
+        items.forEach((item) => {
+            super.add(item);
+            if (item.id > maxId) {
+                maxId = item.id;
+            }
+            this.id = maxId  +1;
+        });
+    }
+
+    private storage: PersistedStorage;
+
+    add(item: T) {
+        super.add(item);
+        var items: Item[];
+
+        this.storage.saveAll(this.items);
+    }
+}
+
+import * as fs from "fs";
+export class FileStorage implements PersistedStorage {
+    private storageFile: string;
+
+    constructor(storageFile: string) {
+        this.storageFile = storageFile;
+    }
+
+    saveItem(item: Item): void {
+
+    }
+
+    loadItem(id: number): Item {
+        return null;
+    }
+
+    saveAll(items: { [id: number]: Item }): void {
+        fs.writeFile(
+            this.storageFile,
+            JSON.stringify(Object.keys(items).map((key) => items[key])),
+            (err) => {
+                if (err) {
+                    console.log('Error while saving all items', err);
+                }
+            }
+        );
+    }
+
+    loadAll(): Item[] {
+        if (!fs.existsSync(this.storageFile)) {
+            return [];
+        }
+        return JSON.parse(fs.readFileSync(this.storageFile).toString());
+    }
+}

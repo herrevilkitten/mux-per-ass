@@ -3,7 +3,7 @@ const retext = require("retext"),
     retextStemmer = require("retext-porter-stemmer"),
     inspect = require('unist-util-inspect');
 
-import {Handler, DataEvent} from "../mush-client";
+import {Handler, InputEvent} from "../mush-client";
 
 export class Retext implements Handler {
     constructor() {
@@ -19,10 +19,10 @@ export class Retext implements Handler {
 
     processor: any;
 
-    handle(event: DataEvent): void {
-        if (!event.data.data.message || event.data.data.type === 'POSE') {
+    handle(event: InputEvent): void {
+        if (!event.input.data.message || event.input.data.type === 'POSE') {
             return;
         }
-        this.processor.process(event.data.data.message);
+        this.processor.process(event.input.data.message);
     }
 }

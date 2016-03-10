@@ -10,7 +10,7 @@ export interface Handler {
 export enum EventType {
     CONNECT,
     DISCONNECT,
-    DATA,
+    INPUT,
     TIMER,
     CUSTOM
 };
@@ -29,8 +29,14 @@ export class Input {
     data: any;
 }
 
-export interface InputPipe {
-    pipe(input: Input): boolean;
+export enum PipeAction {
+    CONTINUE,
+    STOP,
+    ABORT
+}
+
+export interface Pipe {
+    pipe(input: Input): PipeAction|void;
 }
 
 export class Event {
@@ -58,13 +64,13 @@ export class DisconnectEvent extends Event {
     }
 }
 
-export class DataEvent extends Event {
-    constructor(client: Client, data: Input) {
+export class InputEvent extends Event {
+    constructor(client: Client, input: Input) {
         super(client);
-        this.type = EventType.DATA;
-        this.data = data;
+        this.type = EventType.INPUT;
+        this.input = input;
     }
-    data: Input;
+    input: Input;
 }
 
 export class TimerEvent extends Event {
@@ -106,7 +112,7 @@ export class Client {
         custom: {}
     };
 
-    pipes: InputPipe[];
+    pipes: Pipe[];
 
     send(data: string): void {
         if (!this.socket) {
@@ -142,7 +148,7 @@ export class Client {
             case EventType.DISCONNECT:
                 handlers = this.handlers.disconnect;
                 break;
-            case EventType.DATA:
+            case EventType.INPUT:
                 handlers = this.handlers.data;
                 break;
             case EventType.TIMER:
@@ -171,7 +177,7 @@ export class Client {
         });
     }
 
-    process(pipe: InputPipe) {
+    process(pipe: Pipe) {
         this.pipes.push(pipe);
     }
 
@@ -211,7 +217,9 @@ export class Client {
             try {
                 for (var i = 0; i < this.pipes.length; ++i) {
                     let result = this.pipes[i].pipe(input);
-                    if (result === false) {
+                    if (result == PipeAction.ABORT) {
+                        return;
+                    } else if (result == PipeAction.STOP) {
                         break;
                     }
                 }
@@ -220,8 +228,7 @@ export class Client {
                 return;
             }
 
-            this.emit(new DataEvent(this, input));
-
+            this.emit(new InputEvent(this, input));
         });
 
         this.socket.on('end', () => {
