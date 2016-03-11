@@ -6,6 +6,8 @@ export interface SayPattern {
     type: string;
 }
 
+const OOC_PATTERN = '<<OOC>> ';
+
 export class MessageType implements Pipe {
     static PATTERNS: SayPattern[] = [
         {
@@ -26,6 +28,13 @@ export class MessageType implements Pipe {
     ]
 
     pipe(input: Input): void {
+        if (input.input.indexOf(OOC_PATTERN) === 0) {
+            input.data.ooc = true;
+            input.input = input.input.slice(OOC_PATTERN.length);
+        } else {
+            input.data.ooc = false;
+        }
+
         for (var i = 0; i < MessageType.PATTERNS.length; ++i) {
             var match = MessageType.PATTERNS[i].pattern.exec(input.input);
             if (match) {
@@ -54,10 +63,17 @@ export class MessageType implements Pipe {
                         break;
                     case 'DIRSAY':
                         preamble = '\'#' + input.data.player.id + ' ';
+                        if (input.data.ooc || input.client.scene) {
+                            preamble = '>' + preamble;
+                        }
                         break;
                     case 'SAY':
                     case 'POSE':
-                        preamble = 'say ';
+                        if (input.data.ooc || input.client.scene) {
+                            preamble = '>';
+                        } else {
+                            preamble = 'say ';
+                        }
                         break;
                 }
             }

@@ -103,6 +103,7 @@ export class Client {
     socket: tls.ClearTextStream;
     connected: boolean;
     initialized: boolean;
+    scene: boolean;
     interval: NodeJS.Timer;
     handlers: {
         connect: Handler[],

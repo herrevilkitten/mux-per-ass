@@ -19,6 +19,8 @@ import {MessageType} from "./modules/message-type";
 import {Retext} from "./modules/retext";
 import {KeepAlive} from "./modules/keep-alive";
 import {Searcher, SEARCH} from "./modules/searcher";
+import {Scenes} from "./modules/scenes";
+import {DiceRoller} from "./modules/dice-roller";
 
 const client = new Client({
     host: configuration.mux.host,
@@ -42,5 +44,7 @@ client.on(EventType.INPUT, new UrlListener())
 client.on(SEARCH, new UrlSearcher());
 client.on(SEARCH, nospoof);
 client.on(EventType.INPUT, new Searcher());
+client.on(EventType.INPUT, new DiceRoller());
+client.on(EventType.INPUT, new Scenes());
 
 client.connect();

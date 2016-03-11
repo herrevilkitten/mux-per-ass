@@ -70,15 +70,12 @@ export class PersistedDatabase<T extends Item> extends Database<T> {
     constructor(storage: PersistedStorage) {
         super();
         this.storage = storage;
-        var items = <T[]>storage.loadAll(),
-            maxId = 0;
+        var items = <T[]>storage.loadAll();
         items.forEach((item) => {
             super.add(item);
-            if (item.id > maxId) {
-                maxId = item.id;
-            }
-            this.id = maxId  +1;
+            this.id = Math.max(item.id, this.id);
         });
+        this.id++;
     }
 
     private storage: PersistedStorage;
