@@ -1,6 +1,6 @@
-import {Event, InputEvent, Handler} from "../mush-client";
-import {SearchEvent} from "./searcher";
-import {Item, PersistedDatabase, FileStorage} from "../database";
+import { Event, InputEvent, Handler } from "../mush-client";
+import { SearchEvent } from "./searcher";
+import { Item, PersistedDatabase, FileStorage } from "../database";
 
 
 const inspect = require('unist-util-inspect'),
@@ -29,6 +29,7 @@ export class Url implements Item {
 const urlStorage = new FileStorage("urls.json")
 export var urlDatabase = new PersistedDatabase<Url>(urlStorage);
 
+
 export class UrlListener implements Handler {
     static URL_PATTERN: RegExp = /(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})(\/\S*)?/gi;
 
@@ -56,12 +57,11 @@ export class UrlListener implements Handler {
             var player = event.input.data.player,
                 data = event.input;
 
-            console.log('Found URL', url);
-            function responseHandler(res) {
+            let responseHandler = (event: InputEvent, res) => {
                 console.log('response', res);
                 console.log('Status code:', res.statusCode);
                 if (res.statusCode == 404) {
-                    event.input.data.respond('"' + url +'" does not exist');
+                    event.input.data.respond('"' + url + '" does not exist');
                     return;
                 }
                 console.log('url', res.fetchedUrls);
@@ -82,6 +82,8 @@ export class UrlListener implements Handler {
                     console.error('Error occurred while retrieving', url);
                 });
             }
+
+            console.log('Found URL', url);
             if (url.indexOf('http:') != -1) {
                 http.get(url, responseHandler);
             } else if (url.indexOf('https:') != -1) {
@@ -107,7 +109,7 @@ export class UrlSearcher implements Handler {
             return;
         }
 
-        urlDatabase.findAll().forEach(function(item: Url) {
+        urlDatabase.findAll().forEach(function (item: Url) {
             if ((item.url || '').indexOf(search) > -1 || (item.title || '').toLowerCase().indexOf(search) > -1) {
                 if (item.url) {
                     event.input.data.respond(item.url + ': ' + (item.title || ''));

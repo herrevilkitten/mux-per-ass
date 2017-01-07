@@ -1,6 +1,6 @@
-import {Handler, ConnectEvent, InputEvent, Input, Pipe, PipeAction} from "../mush-client";
-import {Item, FileStorage, PersistedDatabase} from "../database";
-import {SearchEvent} from "./searcher";
+import { Handler, ConnectEvent, InputEvent, Input, Pipe, PipeAction } from "../mush-client";
+import { Item, FileStorage, PersistedDatabase } from "../database";
+import { SearchEvent } from "./searcher";
 
 export class Player implements Item {
     constructor(id: number, name: string) {
@@ -8,7 +8,7 @@ export class Player implements Item {
         this.names = [name];
         this.lastName = name;
     }
-    
+
     id: number;
     names: string[];
     lastName: string;
@@ -45,7 +45,7 @@ export class PlayersPlugin implements Handler, Pipe {
             return;
         }
 
-        playerDatabase.findAll().forEach(function(item: Player) {
+        playerDatabase.findAll().forEach(function (item: Player) {
             var match = false;
             if (item.id == Number(search)) {
                 match = true;
@@ -67,12 +67,12 @@ export class PlayersPlugin implements Handler, Pipe {
         var players = event.input.original.slice(8).split('|');
         players.forEach((item) => {
             var [sid, name, connected] = item.split(':'),
-            id = Number(sid.slice(1));
-            var player = playerDatabase.find({id: id});
+                id = Number(sid.slice(1));
+            var player = playerDatabase.find({ id: id });
             if (!player) {
                 player = new Player(id, name);
                 player.connected = connected != '-1';
-                
+
                 console.log('Adding new player: ' + name + ' (#' + id + ')');
                 playerDatabase.add(player);
             }

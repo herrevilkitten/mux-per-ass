@@ -3,7 +3,7 @@ import {Handler, TimerEvent, Pipe, PipeAction, Input} from "../mush-client";
 export class KeepAlive implements Handler, Pipe {
     count: number = 0;
 
-    pipe(input: Input): PipeAction {
+    pipe(input: Input): PipeAction|void {
         if (input.input == 'NoIdle') {
             return PipeAction.ABORT;
         }
